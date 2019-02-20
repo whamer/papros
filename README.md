@@ -13,6 +13,6 @@ You can install papros from github with:
 
 ```r
 if(!require('devtools')) install.packages('devtools')
-devtools::install_github("")
+devtools::install_github("whamer/papros")
 ```
 
