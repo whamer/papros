@@ -1,0 +1,293 @@
+---
+title: "Examplary application of `papros`"
+author: "Wolfgang Hamer"
+date: "20 Februar 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# {.tabset .tabset-fade}
+
+## Data preparation # {.tabset .tabset-fade}
+
+
+### Climate Data
+
+#### First the required librarys
+
+
+```{r lib,warning=FALSE,message=FALSE}
+library(papros)
+library(magrittr)
+library(tidyr)
+```
+
+#### Download of weather data
+
+Now we can download the weather data, which are interesting for the prediction of the pathogen powdery mildew. The weather data are separated in historical data and recent data. The historical data reach longer in the past and are no longer updated in contradiction to the recent data. 
+
+```{r dowload,warning=FALSE,message=FALSE}
+if(!file.exists("./data/rdsfiles/hist_weath_sh.rds")){
+  hist_weath_sh <- download_statewide_hourly_station_data(state = "Schleswig-Holstein",
+                                                        time = "historical",
+                                                        coord = TRUE)
+  
+  saveRDS(hist_weath_sh, "./data/rdsfiles/hist_weath_sh.rds")
+}else{
+  hist_weath_sh <- readRDS("./data/rdsfiles/hist_weath_sh.rds")
+}
+
+if(!file.exists("./data/rdsfiles/rec_weath_sh.rds")){
+  rec_weath_sh <- download_statewide_hourly_station_data(state = "Schleswig-Holstein",
+                                                        time = "recent",
+                                                        coord = TRUE)
+  
+  saveRDS(rec_weath_sh, "./data/rdsfiles/rec_weath_sh.rds")
+}else{
+  rec_weath_sh <- readRDS("./data/rdsfiles/rec_weath_sh.rds")
+}
+
+weath_sh <- rbind(hist_weath_sh, rec_weath_sh) %>% 
+  dplyr::distinct()
+```
+
+#### Reduce dataset and calculate Cumulative Thermal Unit
+
+Since we only have infestation data from 1996 on (sorry I can not supply these to you) we select the weather data from the first october of 1995 on. Why from this date? Because we use the function `large_ctu` to calculate the Cumulative Thermal Unit, which represents the growth of wheat for our example and we assume that the wheat has been sown on this date.
+
+```{r reducedata,warning=FALSE,message=FALSE}
+if(!file.exists("./data/rdsfiles/weath_sh.rds")){
+  weath_sh %<>% dplyr::filter(DateTime > 1995093023) %>%
+    dplyr::mutate(Date = as.Date(substr(DateTime,1,8),"%Y%m%d")) %>% 
+    dplyr::mutate(CTU = large_ctu(dataset = .,
+                                  temp_column = "Temperature",
+                                  date_column = "Date",
+                                  start_date = "10-01",
+                                  location_column = "ID")) %>%
+    dplyr::select(-Date)
+  
+  saveRDS(weath_sh, "./data/rdsfiles/weath_sh.rds")
+}else{
+  weath_sh <- readRDS("./data/rdsfiles/weath_sh.rds")
+}
+
+
+head(weath_sh)
+```
+
+#### Download multi annual DWD data in the area of interest
+
+In addition to the hourly weahter data we downloaded before, we add some multi-annual climate data, since we assume, that this also influences the spread of the pathogen. 
+
+```{r climate,warning=FALSE,message=FALSE}
+library(raster)
+if(!file.exists("./data/rdsfiles/coraster.rds")){
+  germ <- raster::getData('GADM', country='DEU', level=1) 
+  sh <- germ[which(germ$NAME_1=="Schleswig-Holstein"),]
+
+  coraster <- raster::stack(download_dwd_raster(parameter = "air_temperature_mean", period = "1961-1990", month = 17, crop=sh),
+                            download_dwd_raster(parameter = "precipitation", period = "1961-1990", month = 17, crop=sh),
+                            download_dwd_raster(parameter = "water_balance", period = "1961-1990", month = 17, crop=sh))
+  
+  coraster <- raster::projectRaster(coraster,crs=CRS("+init=epsg:25832"))
+  saveRDS(coraster, "./data/rdsfiles/coraster.rds")
+}else{
+  coraster <- readRDS("./data/rdsfiles/coraster.rds")
+}
+
+library(mapview)
+mapview(coraster[[1]])+mapview(coraster[[2]])+mapview(coraster[[3]])
+```
+
+### Infestation Data
+
+Now we include the infestation data and create a `SpatialPointsDataFrame` of them.
+
+```{r infdat,warning=FALSE,message=FALSE}
+library(sp)
+inf_dat <- read.csv2("./data/raw_data/spatial/infestation_data_2.csv") %>% 
+  dplyr::mutate(Date = as.Date(as.character(Date,"%Y-%m-%d")))
+head(inf_dat)
+inf_dat_sp <- SpatialPointsDataFrame(coords = inf_dat[,c("x","y")], 
+                                     data = inf_dat, 
+                                     proj4string = CRS(("+init=epsg:25832")))
+
+# Remove duplicated locations for interpolation
+inf_dat_sp_single <- inf_dat_sp[!duplicated(inf_dat_sp$Location),-c(5,6)]
+
+# Add Covariable raster data
+inf_dat_sp_single <- raster::extract(coraster,inf_dat_sp_single,sp=TRUE)
+
+inf_dat_sp_single
+```
+
+
+## Powdery Mildew Prediction
+
+### Interpolate an aggregate weather for monitoring locations
+
+For the prediction of the infestations we need to know, how the weather was at the locations we now about. Therefore we need to interoplate the weahter data. In this example we tell the function `aggregate_interpolate_points` to interpolate all wehater parameters trying Ordinary Kriging and if this should not work, trying Inverse Distance Weighting. Of course, for only one interoplation we would manually create and fit a nice variogram, but remeber that we have hourly weather data of 20 years! Therfore we use automated fitting algorithms.Also in this step included is the aggregation and reduction of the dataset. The function `reduce_input` only selects weahter data of the dates, relevant for our infestation data. But why do we use this specific function? Because we assume a temporal difference between the observation of the infestation (the incubation period) and the time span (infection period) during which the weather was important for the infestation. Therefore these parameters are included in the functions as well.
+
+```{r intpbg,warning=FALSE,message=FALSE}
+if(!file.exists("./data/rdsfiles/weath_sh_pm_int.rds")){
+  # How many interpolations would be carried out?
+  length(unique(weath_sh$DateTime))
+  # Still quite large, better to reduce the dataset to the times relevant for the infestation by powdery mildew:
+  weath_sh_pm <- reduce_input(dataframe = weath_sh,
+                              DateTime = "DateTime",
+                              infection = 2,
+                              incubation = 8,
+                              event_dates = inf_dat$Date)
+
+  length(unique(weath_sh_pm$DateTime))
+
+  weath_sh_pm_int <- aggregate_interpolate_points(dataframe = weath_sh_pm,
+                                                  coords = c("lon","lat"),
+                                                  DateTime = "DateTime",
+                                                  infection=2,
+                                                  incubation=8,
+                                                  aim_variable =c("Temperature","Humidity","Precipitation","WindSpeed","CTU"),
+                                                  outputfile=inf_dat_sp_single,
+                                                  co_variables = FALSE,
+                                                  procedure = c("ok","idw"),
+                                                  epsg = 4326,
+                                                  trans_epsg = 25832)
+  saveRDS(weath_sh_pm_int, "./data/rdsfiles/weath_sh_pm_int.rds")
+}else{
+  weath_sh_pm_int <- readRDS("./data/rdsfiles/weath_sh_pm_int.rds")
+}
+
+```
+
+### Create combined dataframe
+
+After interpolation we combine the interpolated and aggregated weather data and the infestation data.
+
+```{r combpm,warning=FALSE,message=FALSE}
+if(!file.exists("./data/rdsfiles/pm_dieas_weath.rds")){
+  pm_dieas_weath <- do.call("rbind",Map(function(x){x@data},x=weath_sh_pm_int)) %>% 
+    dplyr::mutate(Date = as.Date(Date,"%Y%m%d")) %>% 
+    dplyr::inner_join(inf_dat, by=c("x","y","Date"))
+  saveRDS(pm_dieas_weath, "./data/rdsfiles/pm_dieas_weath.rds")
+}else{
+  pm_dieas_weath <- readRDS("./data/rdsfiles/pm_dieas_weath.rds")
+}
+
+head(pm_dieas_weath)
+```
+
+### Create machine learning model
+
+Then we let the machine (here the Random Forest algorithm) learn under which circumstances dangerous events (defined by us as disease incidence larger than 70) occured. By now I did not include the enhancement methods I created during my [thesis](https://macau.uni-kiel.de/receive/dissertation_diss_00023094), but this will happen soon.
+
+```{r pmml,warning=FALSE,message=FALSE}
+pm_dieas_weath %<>% na.omit() %>% 
+  dplyr::mutate(Danger = Infection_PM) %>% 
+  dplyr::mutate(Danger = as.factor(ifelse(Danger<70,0,1)))
+
+rf_pred_pm <- machine_learner(dataframe=pm_dieas_weath,
+                           aim_variable="Danger",
+                           co_variables=c("Temperature_mean","Temperature_min","Temperature_max",
+                                          "Humidity_mean","Humidity_min","Humidity_max",
+                                          "Precipitation_mean","Precipitation_min","Precipitation_max",
+                                          "WindSpeed_mean","WindSpeed_min","WindSpeed_max","air_temp_mean_1961.1990_17",
+                                          "precipitation_1961.1990_17","water_balance_1961.1990_17","CTU_mean"),
+                           method = "RF")
+                
+```
+
+### Spatio-temporal prediction
+
+To create spatio-temporal predictions we interpolate the weather data of some days not only for some points but for the whole area of Schleswig-Holstein and use the `machine_predictor` to predict the model generated using the `machine_learner` on the raster stacks.
+
+```{r pmpred,warning=FALSE,message=FALSE}
+# Lets try a spatial prediction for some days
+rec_weath_sh <- readRDS("./data/rdsfiles/rec_weath_sh.rds")
+rec_weath_sh %<>% dplyr::mutate(Date = as.Date(substr(DateTime,1,8),"%Y%m%d")) %>% 
+  dplyr::mutate(CTU = large_ctu(dataset = ., 
+                                temp_column = "Temperature", 
+                                date_column = "Date", 
+                                start_date = "10-01", 
+                                location_column = "ID")) %>% 
+  dplyr::select(-Date) %>% 
+  reduce_input(dataframe = .,
+               DateTime = "DateTime",
+               infection = 2,
+               incubation = 8,
+               event_dates = seq(from = as.Date("2018-06-01","%Y-%m-%d"),
+                                 to = as.Date("2018-06-15","%Y-%m-%d"),
+                                 by = 1))
+
+
+if(!dir.exists("./data/rdsfiles/pred_weath_sh_pm_int")){
+  pred_weath_sh_pm_int <- aggregate_interpolate_points(dataframe = rec_weath_sh,
+                                                       coords = c("lon","lat"),
+                                                       DateTime = "DateTime",
+                                                       infection=2,
+                                                       incubation=8,
+                                                       aim_variable =c("Temperature","Humidity","Precipitation","WindSpeed","CTU"),
+                                                       outputfile=coraster[[1]],
+                                                       co_variables = FALSE,
+                                                       procedure = c("ked","ok","idw"),
+                                                       epsg = 4326,
+                                                       trans_epsg = 25832)
+  store_rasterstacklist(rstacklist = pred_weath_sh_pm_int,
+                      pathfolder = "./data/rdsfiles/pred_weath_sh_pm_int")
+}else{
+  pred_weath_sh_pm_int <- read_rasterstacklist(pathfolder = "./data/rdsfiles/pred_weath_sh_pm_int")
+}
+                                      
+pm_predicted_stack <- machine_predictor(rstack = pred_weath_sh_pm_int,
+                                        mmodel = rf_pred_pm$RF,
+                                        additionalRaster = coraster,
+                                        type = "prob",
+                                        index = 2)
+
+plot(pm_predicted_stack)
+
+```
+
+
+### Create video from predicted stack
+
+The `videoplot_rasterstack` allows us to use the animation package (which itself uses ffmpeg) to creat a nice video of our predictions.
+
+```{r sppm,warning=FALSE,message=FALSE}
+videoplot_rasterstack(rstack = pm_predicted_stack,
+                      ffmpeg_path = paste0(getwd(),"/data/ffmpeg-20150911-git-f58e011-win64-static/bin/ffmpeg.exe"),
+                      storefile = "./plots/powdery_mildew_pred.mp4",
+                      col=colorRampPalette(c("#1a9850","#66bd63","#a6d96a","#d9ef8b","#fee08b","#fdae61","#f46d43","#d73027"))(8))
+```
+
+```{r}
+library(shinyLP)
+iframe(width = "415", height = "415",
+url_link = "./plots/powdery_mildew_pred.mp4")
+```
+
+
+### PLZ specific predictions
+
+The `machine_predictor_lineplot` allows location specific plots for points and polygons:
+
+```{r plzpm,warning=FALSE,message=FALSE}
+library(sf)
+library(ggplot2)
+plz <- read_sf("./data/raw_data/spatial/plz5sh-stellig.gpkg") %>% 
+  as(.,"Spatial")
+
+se <- 155
+
+plot(plz)
+plot(plz[se,],add=TRUE,col="red")
+
+machine_predictor_lineplot(rstack = pm_predicted_stack, 
+                           location = plz[se,], 
+                           yname ="Probability of endangering events",
+                           ylim=c(0,1),
+                           rollingaverage = 1, 
+                           threshold = 0.5)
+```
