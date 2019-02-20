@@ -7,7 +7,7 @@ It is based on my [thesis](https://macau.uni-kiel.de/receive/dissertation_diss_0
 
 ### Citation
 
-Hamer, W.B. (2018). Spatial prediction of the infestation risks of winter wheat by the pathogens Blumeria graminis f. sp. tritici (Powdery mildew) and Puccinia triticina (Brown rust) in Schleswig-Holstein using machine learning techniques (Doctoral dissertation). Retrieved from https://macau.uni-kiel.de/receive/dissertation_diss_00023094
+Hamer, W.B. (2018). Spatial prediction of the infestation risks of winter wheat by the pathogens Blumeria graminis f. sp. tritici (Powdery mildew) and Puccinia triticina (Brown rust) in Schleswig-Holstein using machine learning techniques (Doctoral dissertation). Retrieved from https://macau.uni-kiel.de/servlets/MCRFileNodeServlet/dissertation_derivate_00007706/Hamer_Dissertation_Pathogen_prognosis.pdf
 
 
 ### Installation
