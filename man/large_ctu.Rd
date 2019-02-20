@@ -9,6 +9,8 @@ large_ctu(dataset, temp_column, date_column, start_date = "10-01",
   TP2D = 28, TCD = 40)
 }
 \arguments{
+\item{dataset}{a dataset}
+
 \item{temp_column}{name of the  temperature column}
 
 \item{date_column}{name of the  date column}

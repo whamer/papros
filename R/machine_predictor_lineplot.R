@@ -2,6 +2,11 @@
 ##' @title Lineplot of predict by raster stack and machine learning model
 ##' @param rstack list containing an raster stack of predictions as created by ´machine_predictor´. The names of the rasters are expected to be in the format "X20180515" for the date 2018-05-15
 ##' @param location sp object containing location information
+##' @param yname name for the y axis
+##' @param ylim default = c(0,100); limits of the y axis
+##' @param rollingaverage default = 1; how many points should be averaged for the line
+##' @param threshold default = FALSE; numeric which indicates a red threshold line on the y axis
+##' @param aggregate_x_ticks default = 5; how many ticks should the x axis have?
 ##' @return plot
 ##' @import ggplot2
 ##' @importFrom raster raster

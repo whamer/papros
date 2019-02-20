@@ -8,8 +8,6 @@ read_rasterstacklist(pathfolder)
 }
 \arguments{
 \item{pathfolder}{folder to which the lists rasterstacks should be exported}
-
-\item{rstacklist}{a list of raster stacks}
 }
 \description{
 This function reads a list of raster stacks as stored by store_rasterstacklist

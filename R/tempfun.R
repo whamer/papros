@@ -70,6 +70,7 @@ ctu <- function(TMP,TBD=0,TP1D=25,TP2D=28,TCD=40){
 ##' (Based on \url{https://www.researchgate.net/publication/281674392_Modeling_physiology_of_crop_development_growth_and_yield})
 ##'
 ##' @title Apply ctu on large dataset
+##' @param dataset a dataset
 ##' @param temp_column name of the  temperature column
 ##' @param date_column name of the  date column
 ##' @param start_date start date of the growing plant; defalut = "10-01" for October the 10th
