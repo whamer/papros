@@ -21,14 +21,14 @@ machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT"
 
   if(any(is.element(method,"BDT"))){
     
-    bdtlist <- do.call("rbind", 
+    BDT <- do.call("rbind", 
                        Map(function(tria){
-      BDT <- C50::C5.0(traindat[,co_variables],
+      BDTmod <- C50::C5.0(traindat[,co_variables],
                        as.factor(traindat[,aim_variable]),
                        control = C50::C5.0Control(minCases =round((dim(traindat)[1]/100)*.7,0)),
                        trials = tria)
       tempres <- data.frame(Observed = as.factor(testdat[,aim_variable]),
-                            Predicted = predict(BDT, testdat[,co_variables]))
+                            Predicted = predict(BDTmod, testdat[,co_variables]))
       
       # Evaluating the Area under the ROC curve.
       dt_pre <- prediction(predictions = as.numeric(tempres$Predicted),
@@ -44,7 +44,7 @@ machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT"
   
   
   if(any(is.element(method,"RF"))){
-    rf_list <- do.call("rbind",Map(function(j){
+    RF <- do.call("rbind",Map(function(j){
       return(do.call("rbind",Map(function(o){
         tryrf <- evalWithTimeout({
           try(
