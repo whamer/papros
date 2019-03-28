@@ -5,7 +5,8 @@
 \title{Apply loocv machine learning functions}
 \usage{
 loocv_machine_learner(dataframe, aim_variable, co_variables,
-  location = FALSE, method = c("DT", "BDT", "RF"))
+  location = FALSE, method = c("DT", "BDT", "RF"),
+  additionalparameters = FALSE, auto = FALSE)
 }
 \arguments{
 \item{dataframe}{dataframe containing variables of interest}
@@ -17,6 +18,10 @@ loocv_machine_learner(dataframe, aim_variable, co_variables,
 \item{location}{defalut = FALSE; Character string with the name of the location. If FALSE each observation is treated as unique location}
 
 \item{method}{default = c("DT","BDT","RF"); which method should be used: DecisionTree, BoostedDecisionTree and/or RandomForest?}
+
+\item{additionalparameters}{default = FALSE; list containing additional parameters for the ML procedures / e.g.: list(RF=list(ntree=10000))}
+
+\item{auto}{default = FALSE; boolean operator defining if "machine_learner" or "auto_machine_learner" should be used}
 }
 \value{
 list containing the models

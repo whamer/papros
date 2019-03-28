@@ -40,7 +40,7 @@ machine_predictor_lineplot <- function(rstack, location,yname,ylim=c(0,100),roll
                        labels=substr(val$Date,6,10))
 
     if(!is.logical(threshold)){
-      pl <- pl + geom_hline(yintercept = threshold, linetype = "dotted",color="red")
+      pl <- pl + geom_hline(yintercept = threshold, linetype = "dotted",color="red", size=1.3)
     }
 
     return(pl)
@@ -83,7 +83,7 @@ machine_predictor_lineplot <- function(rstack, location,yname,ylim=c(0,100),roll
                          labels=substr(val$Date,6,10)[x_ticks])
 
     if(!is.logical(threshold)){
-      pl <- pl + geom_hline(yintercept = threshold, linetype = "dotted",color="red")
+      pl <- pl + geom_hline(yintercept = threshold, linetype = "dotted",color="red", size=1.3)
     }
     return(pl)
   }

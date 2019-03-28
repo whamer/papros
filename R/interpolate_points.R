@@ -81,7 +81,11 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
                          crs = CRS(proj4string(sp_points)))
     outputfile[]<- rep(1,length(outputfile$layer[]))
   }
-  if ('RasterLayer' %in% class(outputfile)){
+  if (any(c('RasterLayer','RasterStack','RasterBrick') %in% class(outputfile))){
+    if (proj4string(sp_points)!=proj4string(outputfile)){
+      #outputfile <- raster::projectRaster(from = outputfile, crs = CRS(proj4string(sp_points)))
+      sp_points <- spTransform(sp_points, proj4string(outputfile))
+    }
     outputfile <- as(outputfile, 'SpatialGridDataFrame')
   }
 
@@ -97,9 +101,21 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
         form <- as.formula(paste0(aim_variable,
                                   ifelse(is.logical(co_variables[1]),"~ 1",
                                          paste("~",paste0(co_variables,collapse = "+")))))
+        sp_points_ked <- sp_points
+        
+        # Remove NAs of covariable
+        if(!is.logical(co_variables[1])){
+          sp_points_ked <- st_as_sf(sp_points_ked) %>% 
+            dplyr::select(aim_variable,co_variables) %>% 
+            na.omit() %>% 
+            as(.,"Spatial")
+          proj4string(sp_points_ked) <- proj4string(sp_points)
+        }
+        
+        
 
         z = capture.output(vers <- try(automap::autoKrige(formula = form,
-                                                          input_data = sp_points,
+                                                          input_data = sp_points_ked,
                                                           new_data = outputfile),
                                        silent=TRUE))
 

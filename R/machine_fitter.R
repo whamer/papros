@@ -8,11 +8,18 @@
 ##' @return list containing the models
 ##' @importFrom C50 C5.0
 ##' @importFrom randomForest randomForest
-##' @importFrom ROCR performance
+##' @importFrom ROCR performance prediction
+##' @importFrom dplyr progress_estimated
 ##' @export machine_fitter
 ##' @author Wolfgang Hamer
 ##' @examples
 machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT","RF"),splitper = 70){
+  method <- method[is.element(method,c("BDT","RF"))]
+  
+  if(any(!is.element(co_variables,names(dataframe)))){
+    warning(paste(co_variables[!is.element(co_variables,names(dataframe))], "not a colname of dataframe!"))
+  }
+  
   sel_el <- sample(x = 1:dim(dataframe)[1],
                    size = (dim(dataframe)[1]/100)*splitper)
   traindat <- dataframe[sel_el,]
@@ -20,6 +27,7 @@ machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT"
   
 
   if(any(is.element(method,"BDT"))){
+    pb <- dplyr::progress_estimated(length(c(1, 5, 10, 15, 20, 25, 30, 35)))
     
     BDT <- do.call("rbind", 
                        Map(function(tria){
@@ -31,11 +39,12 @@ machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT"
                             Predicted = predict(BDTmod, testdat[,co_variables]))
       
       # Evaluating the Area under the ROC curve.
-      dt_pre <- prediction(predictions = as.numeric(tempres$Predicted),
-                           labels = tempres$Observed)
+      dt_pre <- ROCR::prediction(predictions = as.numeric(tempres$Predicted),
+                                 labels = tempres$Observed)
       dt_perfa <- ROCR::performance(dt_pre,
                                     measure = "auc")                                                
       dt_auc <- unlist(dt_perfa@y.values)
+      pb$tick()$print()
       return(data.frame(Trials = tria,
                         ROCAUC = dt_auc))
     },
@@ -44,19 +53,18 @@ machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT"
   
   
   if(any(is.element(method,"RF"))){
+    pb <- dplyr::progress_estimated(length(seq(1,2E6,.25E6))*length(c(2,4,8,18)))
+    
     RF <- do.call("rbind",Map(function(j){
       return(do.call("rbind",Map(function(o){
-        tryrf <- evalWithTimeout({
-          try(
+        tryrf <- try(
             randomForest::randomForest(traindat[,co_variables],
                                        traindat[,aim_variable],
                                        importance=TRUE, 
                                        ntree=1000,
                                        mtry=j,
                                        classwt = c(1,o)), 
-            silent=TRUE)},
-          timeout=6000,
-          onTimeout="warning")
+            silent=TRUE)
         if (any(class(tryrf) == "try-error")){
           rf_auc=0
         }else{
@@ -64,18 +72,19 @@ machine_fitter <- function(dataframe, aim_variable, co_variables, method=c("BDT"
                                 Predicted = predict(tryrf, testdat[,co_variables]))
           
           # Evaluating the Area under the ROC curve.
-          rf_pre <- prediction(predictions = as.numeric(tempres$Predicted),
-                               labels = tempres$Observed)
+          rf_pre <- ROCR::prediction(predictions = as.numeric(tempres$Predicted),
+                                     labels = tempres$Observed)
           rf_perfa <- ROCR::performance(rf_pre,
                                         measure = "auc")                                                
           rf_auc <- unlist(rf_perfa@y.values)
-          return(data.frame(Mtry = j,
-                            Classwt = o,
-                            ROCAUC = rf_auc))
         }
+        pb$tick()$print()
+        return(data.frame(Mtry = j,
+                          Classwt = o,
+                          ROCAUC = rf_auc))
       },o = seq(1,2E6,.25E6))))},
       j = c(2,4,8,18)
-    )
+    ))
   }
   
   

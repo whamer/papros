@@ -56,6 +56,49 @@ machine_learner <- function(dataframe, aim_variable, co_variables, method=c("DT"
 }
 
 
+##' This functions applies one or several machine learning methods on a given dataset
+##' @title Apply machine learning functions
+##' @param dataframe dataframe containing variables of interest
+##' @param aim_variable Character string with the name of the aim variable
+##' @param co_variables Character string with the name of the co-variables
+##' @param method default = c("DT","BDT","RF"); which method should be used: DecisionTree, BoostedDecisionTree and/or RandomForest?
+##' @param additionalparameters default = FALSE; list containing additional parameters for the ML procedures / e.g.: list(RF=list(ntree=10000))
+##' @return list containing the models
+##' @importFrom C50 C5.0
+##' @importFrom randomForest randomForest
+##' @export auto_machine_learner
+##' @author Wolfgang Hamer
+##' @examples
+auto_machine_learner <- function(dataframe, aim_variable, co_variables, method=c("DT","BDT","RF")){
+  
+  ma_fi <- machine_fitter(dataframe = dataframe,
+                          aim_variable = aim_variable,
+                          co_variables = co_variables,
+                          method = method)
+  
+  additionalparameters <- list()
+  
+  if(is.element("DT",method)){
+    additionalparameters$DT <- list()
+  }
+  
+  if(is.element("BDT",method)){
+    additionalparameters$BDT <- list(trials = ma_fi$BDT$Trials[which.max(ma_fi$BDT$ROCAUC)])
+  }
+  
+  if(is.element("RF",method)){
+    additionalparameters$RF <- list(mtry = ma_fi$RF$Mtry[which.max(ma_fi$RF$ROCAUC)],
+                                    classwt = c(1,ma_fi$RF$Classwt[which.max(ma_fi$RF$ROCAUC)]))
+  }
+  
+  models <- machine_learner(dataframe = dataframe,
+                            aim_variable = aim_variable,
+                            co_variables = co_variables,
+                            method = method,
+                            additionalparameters = additionalparameters)
+  return(models)
+}
+
 
 
 ##' This functions applies one or several machine learning methods on a given dataset and checks for the validity of the prediction
@@ -65,6 +108,8 @@ machine_learner <- function(dataframe, aim_variable, co_variables, method=c("DT"
 ##' @param co_variables Character string with the name of the co-variables
 ##' @param location defalut = FALSE; Character string with the name of the location. If FALSE each observation is treated as unique location
 ##' @param method default = c("DT","BDT","RF"); which method should be used: DecisionTree, BoostedDecisionTree and/or RandomForest?
+##' @param additionalparameters default = FALSE; list containing additional parameters for the ML procedures / e.g.: list(RF=list(ntree=10000))
+##' @param auto default = FALSE; boolean operator defining if "machine_learner" or "auto_machine_learner" should be used
 ##' @return list containing the models
 ##' @import dplyr
 ##' @importFrom magrittr %>%
@@ -72,7 +117,7 @@ machine_learner <- function(dataframe, aim_variable, co_variables, method=c("DT"
 ##' @export loocv_machine_learner
 ##' @author Wolfgang Hamer
 ##' @examples
-loocv_machine_learner <- function(dataframe, aim_variable, co_variables, location=FALSE, method=c("DT","BDT","RF")){
+loocv_machine_learner <- function(dataframe, aim_variable, co_variables, location=FALSE, method=c("DT","BDT","RF"), additionalparameters=FALSE, auto=FALSE){
   if(is.logical(location)){
     dataframe$Loc_LOOCV <-  1:nrow(dataframe)
   }else{
@@ -89,10 +134,19 @@ loocv_machine_learner <- function(dataframe, aim_variable, co_variables, locatio
                      dataframe_vali <- dataframe %>%
                        dplyr::filter(Loc_LOOCV == leftout)
 
-                     models <- machine_learner(dataframe = dataframe_cali,
-                                               aim_variable = aim_variable,
-                                               co_variables = co_variables,
-                                               method = method)
+                     if(auto){
+                       models <- machine_learner(dataframe = dataframe_cali,
+                                                 aim_variable = aim_variable,
+                                                 co_variables = co_variables,
+                                                 method = method, 
+                                                 additionalparameters=additionalparameters)
+                     }else{
+                       models <- auto_machine_learner(dataframe = dataframe_cali,
+                                                      aim_variable = aim_variable,
+                                                      co_variables = co_variables,
+                                                      method = method)
+                     }
+                     
 
                      unm <- names(models)
 

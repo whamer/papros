@@ -80,7 +80,7 @@ aggregate_interpolate_points <- function(dataframe, coords, epsg, DateTime, infe
                                            co_variables = co_variables,
                                            procedure = procedure,
                                            progressbar = FALSE)
-      if(class(outputfile)=="numeric"|class(outputfile)=="RasterLayer"|class(outputfile)=="SpatialGridsDataFrame"){
+      if(class(outputfile)=="numeric"|class(outputfile)=="RasterLayer"|class(outputfile)=="RasterStack"|class(outputfile)=="RasterBrick"|class(outputfile)=="SpatialGridsDataFrame"){
         meanit <- raster::mean(raster::stack(itint))
         names(meanit) <- paste0(plura,"_mean")
         minit <- raster::calc(raster::stack(itint),min)
