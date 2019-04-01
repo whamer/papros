@@ -135,16 +135,16 @@ loocv_machine_learner <- function(dataframe, aim_variable, co_variables, locatio
                        dplyr::filter(Loc_LOOCV == leftout)
 
                      if(auto){
+                       models <- auto_machine_learner(dataframe = dataframe_cali,
+                                                      aim_variable = aim_variable,
+                                                      co_variables = co_variables,
+                                                      method = method)
+                     }else{
                        models <- machine_learner(dataframe = dataframe_cali,
                                                  aim_variable = aim_variable,
                                                  co_variables = co_variables,
                                                  method = method, 
                                                  additionalparameters=additionalparameters)
-                     }else{
-                       models <- auto_machine_learner(dataframe = dataframe_cali,
-                                                      aim_variable = aim_variable,
-                                                      co_variables = co_variables,
-                                                      method = method)
                      }
                      
 

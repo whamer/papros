@@ -17,6 +17,7 @@
 ##' @importFrom automap autoKrige
 ##' @importFrom magrittr %>%
 ##' @importFrom magrittr %<>%
+##' @import sf 
 ##' @export interpolate_points
 ##' @author Wolfgang Hamer
 ##' @examples
@@ -105,20 +106,22 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
         
         # Remove NAs of covariable
         if(!is.logical(co_variables[1])){
-          sp_points_ked <- st_as_sf(sp_points_ked) %>% 
+          sp_points_ked <- sf::st_as_sf(sp_points_ked) %>% 
             dplyr::select(aim_variable,co_variables) %>% 
             na.omit() %>% 
             as(.,"Spatial")
-          proj4string(sp_points_ked) <- proj4string(sp_points)
+          sp_points_ked@proj4string <- CRS(proj4string(sp_points))
         }
         
-        
-
-        z = capture.output(vers <- try(automap::autoKrige(formula = form,
-                                                          input_data = sp_points_ked,
-                                                          new_data = outputfile),
-                                       silent=TRUE))
-
+        if(dim(sp_points_ked)[1] < 5){
+          vers <- paste("With",dim(sp_points_ked)[1],"elements to interpolate, no KED!")
+        }else{
+          z = capture.output(vers <- try(automap::autoKrige(formula = form,
+                                                            input_data = sp_points_ked,
+                                                            new_data = outputfile),
+                                         silent=TRUE))
+        }
+      
         if ('autoKrige' %in% class(vers)){
           if("SpatialPointsDataFrame" %in% class(outputfile)){
             returnobj <- vers$krige_output
@@ -136,10 +139,15 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
 
       if(procedure[1]=="ok"){
         form <- as.formula(paste0(aim_variable,"~ 1"))
+        
+        if(dim(sp_points)[1] < 5){
+          vers <- paste("With",dim(sp_points)[1],"elements to interpolate, no OK!")
+        }else{
         z = capture.output(vers <- try(automap::autoKrige(formula = form,
                                                           input_data = sp_points,
                                                           new_data = outputfile),
                                        silent=TRUE))
+        }
 
         if ('autoKrige' %in% class(vers)){
           if("SpatialPointsDataFrame" %in% class(outputfile)){
