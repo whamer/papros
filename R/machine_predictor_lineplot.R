@@ -18,6 +18,8 @@
 ##' @importFrom raster writeRaster
 ##' @importFrom zoo rollmean
 ##' @importFrom raster predict
+##' @importFrom magrittr %>%
+##' @importFrom magrittr %<>%
 ##' @export machine_predictor_lineplot
 ##' @author Wolfgang Hamer
 ##' @examples

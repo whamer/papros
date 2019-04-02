@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2574046.svg)](https://doi.org/10.5281/zenodo.2574046) 
+
 # papros
 
 The goal of this PAthogene PROgnosis System is to prognose severe infection events with fungi on agricultural plants. 
