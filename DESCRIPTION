@@ -1,11 +1,12 @@
 Package: papros
-Title: PAthogene PROgnosis System
+Title: PAthogen PROgnosis System
 Version: 1.0
 Authors@R: 
     person(given = "Wolfgang",
            family = "Hamer",
            role = c("aut", "cre"),
-           email = "hamer@geographie.uni-kiel.de")
+           email = "hamer@geographie.uni-kiel.de",
+		   comment = c(ORCID = "0000-0002-5943-5020"))
 Description: The package can be used to prognose severe infection events with fungi on agricultural plants. 
 License: GPL-3
 ByteCompile: true
