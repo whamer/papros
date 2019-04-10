@@ -4,8 +4,8 @@
 ##' @param aim_variable Character string with the name of the aim variable
 ##' @param outputfile SpatialPointsDataframe, SpatialGridDataFrame or raster which should be filled with predictions; requires covariables for "ked" (if two values are given in a vector a raster is created with the resolution given by the values)
 ##' @param co_variables default = FALSE, vector of covariables if needed
-##' @param procedure default = c("ked","ok","idw"); vector containing the interpolation technic to be used; the first method is used and if this does not work out, the second, and so on
-##' @return a dataframe or a SpatialPointsDataFrame containing information about DWD locations in Germany
+##' @param procedure default = c("ked","rfk,"ok","idw"); vector containing the interpolation technic to be used; the first method is used and if this does not work out, the second, and so on; KED = Kriging With external Drift; RFK = Random Forest Kriging; OK = Ordinary Kriging; IDW = Inverse distance Weighting
+##' @return interpolated point values as sp or raster file depending on outputfile
 ##' @import dplyr sp gstat
 ##' @importFrom raster raster
 ##' @importFrom raster stack
@@ -71,11 +71,11 @@
 ##'                                    co_variables = c("lat","lon"),
 ##'                                    procedure = c("ked","ok","idw"))
 
-interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables = FALSE, procedure = c("ked","ok","idw")){
+interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables = FALSE, procedure = c("ked","rfk","ok","idw")){
   success <- FALSE
-
+  
   sp_points <- sp_points[!is.na(sp_points@data[,aim_variable]),]
-
+  
   if(length(outputfile)==2){
     outputfile <- raster(ext=extent(sp_points),
                          resolution = outputfile,
@@ -89,9 +89,9 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
     }
     outputfile <- as(outputfile, 'SpatialGridDataFrame')
   }
-
-
-
+  
+  
+  
   while(success == FALSE){
     if(length(procedure)==0 & success == FALSE){
       warning("No interpolation possible!")
@@ -121,7 +121,7 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
                                                             new_data = outputfile),
                                          silent=TRUE))
         }
-      
+        
         if ('autoKrige' %in% class(vers)){
           if("SpatialPointsDataFrame" %in% class(outputfile)){
             returnobj <- vers$krige_output
@@ -136,19 +136,32 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
           procedure <- procedure[-1]
         }
       }
-
+      
+      if(procedure[1]=="rfk"){
+        returnobj <- random_forest_interpolation(sp_points = sp_points, 
+                                                 aim_variable = aim_variable, 
+                                                 co_variables = co_variables, 
+                                                 outputfile = outputfile)
+        
+        if(any(c("SpatialPointsDataFrame","RasterLayer") %in% class(returnobj))){
+          success <- TRUE
+        }else{
+          procedure <- procedure[-1]
+        }
+      }
+      
       if(procedure[1]=="ok"){
         form <- as.formula(paste0(aim_variable,"~ 1"))
         
         if(dim(sp_points)[1] < 5){
           vers <- paste("With",dim(sp_points)[1],"elements to interpolate, no OK!")
         }else{
-        z = capture.output(vers <- try(automap::autoKrige(formula = form,
-                                                          input_data = sp_points,
-                                                          new_data = outputfile),
-                                       silent=TRUE))
+          z = capture.output(vers <- try(automap::autoKrige(formula = form,
+                                                            input_data = sp_points,
+                                                            new_data = outputfile),
+                                         silent=TRUE))
         }
-
+        
         if ('autoKrige' %in% class(vers)){
           if("SpatialPointsDataFrame" %in% class(outputfile)){
             returnobj <- vers$krige_output
@@ -163,14 +176,14 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
           procedure <- procedure[-1]
         }
       }
-
+      
       if(procedure[1]=="idw"){
         form <- as.formula(paste0(aim_variable,"~ 1"))
         z = capture.output(vers <- try(gstat::idw(form,
                                                   sp_points,
                                                   outputfile),
                                        silent=TRUE))
-
+        
         if ('try-error' %in% class(vers)){
           message(paste("Method idw did not success because:",vers))
           procedure <- procedure[-1]

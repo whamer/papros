@@ -13,7 +13,7 @@
 ##' @author Wolfgang Hamer
 ##' @examples
 store_rasterstacklist <- function(rstacklist, pathfolder){
-  dir.create(pathfolder, showWarnings = FALSE)
+  dir.create(pathfolder, recursive=TRUE, showWarnings = FALSE)
 
   tem <- Map(function(x){
     writeRaster(rstacklist[[x]],
