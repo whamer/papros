@@ -22,11 +22,15 @@
 ##' @author Wolfgang Hamer
 ##' @examples
 ##'
+##' library(magrittr)
+##' library(dplyr)
+##' library(sp)
+##' library(raster)
 ##' # Download example data
 ##' shdat <- download_statewide_hourly_station_data(state = "Schleswig-Holstein", coord = TRUE)
 ##'
 ##' # Select data of specific Time / Date
-##' da_sel <- shdat %>% filter(DateTime == sort(unique(shdat$DateTime))[5])
+##' da_sel <- shdat %>% dplyr::filter(DateTime == sort(unique(shdat$DateTime))[5])
 ##'
 ##' # Create spatial dataset
 ##' da_sel_sp <- SpatialPointsDataFrame(da_sel[,c("lon", "lat")],

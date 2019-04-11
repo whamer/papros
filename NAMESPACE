@@ -2,6 +2,7 @@
 
 export(aggregate_interpolate_points)
 export(apply_statistical_measures)
+export(auto_interpolate_points)
 export(auto_machine_learner)
 export(ctu)
 export(download_alltime_hourly_station_data)
