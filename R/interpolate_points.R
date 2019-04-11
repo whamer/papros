@@ -93,7 +93,7 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
   
   
   while(success == FALSE){
-    if(length(procedure)==0 & success == FALSE){
+    if(procedure[1]=="empty" & success == FALSE){
       warning("No interpolation possible!")
       returnobj <- NA
       success <- TRUE
@@ -137,6 +137,8 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
         }
       }
       
+      if(length(procedure)==0){procedure <- "empty"}
+      
       if(procedure[1]=="rfk"){
         returnobj <- random_forest_interpolation(sp_points = sp_points, 
                                                  aim_variable = aim_variable, 
@@ -149,6 +151,8 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
           procedure <- procedure[-1]
         }
       }
+      
+      if(length(procedure)==0){procedure <- "empty"}
       
       if(procedure[1]=="ok"){
         form <- as.formula(paste0(aim_variable,"~ 1"))
@@ -177,6 +181,8 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
         }
       }
       
+      if(length(procedure)==0){procedure <- "empty"}
+      
       if(procedure[1]=="idw"){
         form <- as.formula(paste0(aim_variable,"~ 1"))
         z = capture.output(vers <- try(gstat::idw(form,
@@ -198,6 +204,7 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
           success <- TRUE
         }
       }
+      if(length(procedure)==0){procedure <- "empty"}
     }
   }
   return(returnobj)
