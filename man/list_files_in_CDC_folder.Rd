@@ -17,7 +17,7 @@ List files in CDC FTP folder
 }
 \examples{
 
-list_files_in_CDC_folder("ftp://ftp-cdc.dwd.de/pub/CDC/observations_germany/climate/hourly/air_temperature/historical/")
+list_files_in_CDC_folder("ftp://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/air_temperature/historical/")
 }
 \author{
 Wolfgang Hamer

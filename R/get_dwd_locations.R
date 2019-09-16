@@ -14,10 +14,10 @@
 get_dwd_locations <- function(sp = FALSE,parameter="temperature"){
   tmp <- tempfile()
   stations <- ifelse(parameter == "temperature",
-                     download.file("ftp://ftp-cdc.dwd.de/pub/CDC/observations_germany/climate/hourly/air_temperature/historical/TU_Stundenwerte_Beschreibung_Stationen.txt",tmp),
+                     download.file("ftp://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/air_temperature/historical/TU_Stundenwerte_Beschreibung_Stationen.txt",tmp),
                      ifelse(parameter == "precipitation",
-                            download.file("ftp://ftp-cdc.dwd.de/pub/CDC/observations_germany/climate/hourly/precipitation/recent/RR_Stundenwerte_Beschreibung_Stationen.txt",tmp),
-                            download.file("ftp://ftp-cdc.dwd.de/pub/CDC/observations_germany/climate/hourly/wind/recent/FF_Stundenwerte_Beschreibung_Stationen.txt",tmp)))
+                            download.file("ftp://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/precipitation/recent/RR_Stundenwerte_Beschreibung_Stationen.txt",tmp),
+                            download.file("ftp://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/wind/recent/FF_Stundenwerte_Beschreibung_Stationen.txt",tmp)))
   avail_loc <- read.table(tmp, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
   unlink(tmp)
 
