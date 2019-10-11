@@ -71,7 +71,6 @@ random_forest_interpolation <- function(sp_points, aim_variable, co_variables, o
     return(returnobj)
   }else{
     message(paste("Method RFK did not success because:",vers))
-    procedure <- procedure[-1]
   }
 }
 
