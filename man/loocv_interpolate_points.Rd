@@ -4,8 +4,12 @@
 \alias{loocv_interpolate_points}
 \title{LOOCV of given point values}
 \usage{
-loocv_interpolate_points(sp_points, aim_variable, co_variables = FALSE,
-  procedure = c("ked", "rfk", "ok", "idw"))
+loocv_interpolate_points(
+  sp_points,
+  aim_variable,
+  co_variables = FALSE,
+  procedure = c("ked", "rfk", "ok", "idw")
+)
 }
 \arguments{
 \item{sp_points}{SpatialPointsDataframe containing the aim variable and if "ked" should be applied the covariables}

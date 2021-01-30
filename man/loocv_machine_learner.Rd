@@ -4,9 +4,15 @@
 \alias{loocv_machine_learner}
 \title{Apply loocv machine learning functions}
 \usage{
-loocv_machine_learner(dataframe, aim_variable, co_variables,
-  location = FALSE, method = c("DT", "BDT", "RF"),
-  additionalparameters = FALSE, auto = FALSE)
+loocv_machine_learner(
+  dataframe,
+  aim_variable,
+  co_variables,
+  location = FALSE,
+  method = c("DT", "BDT", "RF"),
+  additionalparameters = FALSE,
+  auto = FALSE
+)
 }
 \arguments{
 \item{dataframe}{dataframe containing variables of interest}

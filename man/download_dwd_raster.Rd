@@ -4,8 +4,13 @@
 \alias{download_dwd_raster}
 \title{Download multi-annual DWD rasters}
 \usage{
-download_dwd_raster(parameter = "air_temperature_mean", period = "",
-  month = "", crop = FALSE, savepath = FALSE)
+download_dwd_raster(
+  parameter = "air_temperature_mean",
+  period = "",
+  month = "",
+  crop = FALSE,
+  savepath = FALSE
+)
 }
 \arguments{
 \item{parameter}{a character string defining the parameter to be downloaded (e.g.: "air_temperature_mean", "drought_index", "evapo_p", "frost_days", "hot_days", "ice_days", "precipitation", "snowcover_days", "soil_moist", "soil_temperature_5cm", "summer_days", "sunshine_duration", "vegetation_begin", "vegetation_end", "water_balance")}

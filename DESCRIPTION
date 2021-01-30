@@ -27,7 +27,6 @@ Imports: sp,
 	 C50,
 	 randomForest,
 	 zoo,
-	 animation,
-	 sf,
-	 ROCR
-RoxygenNote: 6.1.1
+	 animation
+RoxygenNote: 7.1.1
+

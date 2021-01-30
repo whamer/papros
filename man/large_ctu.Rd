@@ -4,9 +4,18 @@
 \alias{large_ctu}
 \title{Apply ctu on large dataset}
 \usage{
-large_ctu(dataset, temp_column, date_column, start_date = "10-01",
-  location_column = FALSE, vector = TRUE, TBD = 0, TP1D = 25,
-  TP2D = 28, TCD = 40)
+large_ctu(
+  dataset,
+  temp_column,
+  date_column,
+  start_date = "10-01",
+  location_column = FALSE,
+  vector = TRUE,
+  TBD = 0,
+  TP1D = 25,
+  TP2D = 28,
+  TCD = 40
+)
 }
 \arguments{
 \item{dataset}{a dataset}

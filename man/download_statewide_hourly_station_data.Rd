@@ -4,9 +4,13 @@
 \alias{download_statewide_hourly_station_data}
 \title{Download hourly weather data of the DWD stations of federal states}
 \usage{
-download_statewide_hourly_station_data(state,
+download_statewide_hourly_station_data(
+  state,
   parameter = c("temperature", "precipitation", "windspeed"),
-  time = "recent", coord = FALSE, savefile = FALSE)
+  time = "recent",
+  coord = FALSE,
+  savefile = FALSE
+)
 }
 \arguments{
 \item{state}{the Federal State (e.g. "Schleswig-Holstein")}

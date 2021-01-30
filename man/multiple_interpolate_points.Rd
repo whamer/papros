@@ -4,9 +4,18 @@
 \alias{multiple_interpolate_points}
 \title{Interpolates DWD values}
 \usage{
-multiple_interpolate_points(dataframe, coords, epsg, splitter,
-  aim_variable, outputfile, trans_epsg = FALSE, co_variables = FALSE,
-  procedure = c("ked", "ok", "idw"), progressbar = TRUE)
+multiple_interpolate_points(
+  dataframe,
+  coords,
+  epsg,
+  splitter,
+  aim_variable,
+  outputfile,
+  trans_epsg = FALSE,
+  co_variables = FALSE,
+  procedure = c("ked", "ok", "idw"),
+  progressbar = TRUE
+)
 }
 \arguments{
 \item{dataframe}{dataframe containing the aim variable and if "ked" should be applied the covariables}

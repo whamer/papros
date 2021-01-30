@@ -4,8 +4,7 @@
 \alias{random_forest_interpolation}
 \title{Random Forest Interpolation}
 \usage{
-random_forest_interpolation(sp_points, aim_variable, co_variables,
-  outputfile)
+random_forest_interpolation(sp_points, aim_variable, co_variables, outputfile)
 }
 \arguments{
 \item{sp_points}{SpatialPointsDataframe containing the aim variable}

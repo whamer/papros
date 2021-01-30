@@ -4,8 +4,12 @@
 \alias{download_windspeed_dwd_raster}
 \title{Download multi-annual windspeed DWD rasters}
 \usage{
-download_windspeed_dwd_raster(parameter = "windspeed", period = "",
-  heigth = "", crop = FALSE)
+download_windspeed_dwd_raster(
+  parameter = "windspeed",
+  period = "",
+  heigth = "",
+  crop = FALSE
+)
 }
 \arguments{
 \item{parameter}{a character string defining the parameter to be downloaded ("e.g.: "windspeed")}

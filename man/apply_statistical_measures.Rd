@@ -4,8 +4,11 @@
 \alias{apply_statistical_measures}
 \title{Calculate statistical measures}
 \usage{
-apply_statistical_measures(dataframe, ObservedName = "Observed",
-  PredictedName = "Predicted")
+apply_statistical_measures(
+  dataframe,
+  ObservedName = "Observed",
+  PredictedName = "Predicted"
+)
 }
 \arguments{
 \item{dataframe}{dataframe containing Observed and Predicted variables as created by `loocv_machine_learner`}

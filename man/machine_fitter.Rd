@@ -4,8 +4,13 @@
 \alias{machine_fitter}
 \title{Apply fitting of machine learning functions}
 \usage{
-machine_fitter(dataframe, aim_variable, co_variables, method = c("BDT",
-  "RF"), splitper = 70)
+machine_fitter(
+  dataframe,
+  aim_variable,
+  co_variables,
+  method = c("BDT", "RF"),
+  splitper = 70
+)
 }
 \arguments{
 \item{dataframe}{dataframe containing variables of interest}

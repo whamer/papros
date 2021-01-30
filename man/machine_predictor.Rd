@@ -4,8 +4,13 @@
 \alias{machine_predictor}
 \title{Predict by raster stack and machine learning model}
 \usage{
-machine_predictor(rstack, mmodel, additionalRaster = FALSE,
-  type = FALSE, index = FALSE)
+machine_predictor(
+  rstack,
+  mmodel,
+  additionalRaster = FALSE,
+  type = FALSE,
+  index = FALSE
+)
 }
 \arguments{
 \item{rstack}{list containing an raster stack with covariables for prediction based on the mmodel}

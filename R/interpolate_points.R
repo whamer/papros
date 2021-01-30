@@ -17,7 +17,6 @@
 ##' @importFrom automap autoKrige
 ##' @importFrom magrittr %>%
 ##' @importFrom magrittr %<>%
-##' @import sf
 ##' @export interpolate_points
 ##' @author Wolfgang Hamer
 ##' @examples
@@ -90,6 +89,7 @@ interpolate_points <- function(sp_points, aim_variable, outputfile, co_variables
     if (proj4string(sp_points)!=proj4string(outputfile)){
       #outputfile <- raster::projectRaster(from = outputfile, crs = CRS(proj4string(sp_points)))
       sp_points <- spTransform(sp_points, proj4string(outputfile))
+      sp_points@proj4string <- outputfile@crs
     }
     outputfile <- as(outputfile, 'SpatialGridDataFrame')
   }

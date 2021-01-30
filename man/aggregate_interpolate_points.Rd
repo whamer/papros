@@ -4,10 +4,20 @@
 \alias{aggregate_interpolate_points}
 \title{Interpolate and temporal aggregate DWD values}
 \usage{
-aggregate_interpolate_points(dataframe, coords, epsg, DateTime, infection,
-  incubation, aim_variable, outputfile, trans_epsg = FALSE,
-  co_variables = FALSE, procedure = c("ked", "ok", "idw"),
-  progressbar = TRUE)
+aggregate_interpolate_points(
+  dataframe,
+  coords,
+  epsg,
+  DateTime,
+  infection,
+  incubation,
+  aim_variable,
+  outputfile,
+  trans_epsg = FALSE,
+  co_variables = FALSE,
+  procedure = c("ked", "ok", "idw"),
+  progressbar = TRUE
+)
 }
 \arguments{
 \item{dataframe}{dataframe containing the aim variable and if "ked" should be applied the covariables}

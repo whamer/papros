@@ -4,9 +4,14 @@
 \alias{auto_interpolate_points}
 \title{Automatically interpolates point values}
 \usage{
-auto_interpolate_points(sp_points, aim_variable, outputfile,
-  co_variables = FALSE, procedure = c("ked", "rfk", "ok", "idw"),
-  show_rmse = TRUE)
+auto_interpolate_points(
+  sp_points,
+  aim_variable,
+  outputfile,
+  co_variables = FALSE,
+  procedure = c("ked", "rfk", "ok", "idw"),
+  show_rmse = TRUE
+)
 }
 \arguments{
 \item{sp_points}{SpatialPointsDataframe containing the aim variable and if "ked" should be applied the covariables}
@@ -20,8 +25,6 @@ auto_interpolate_points(sp_points, aim_variable, outputfile,
 \item{procedure}{default = c("ked","rfk,"ok","idw"); vector containing the interpolation technic to be used; all methods are tested and the method with the lowest RMSE is used for the interpolation; KED = Kriging With external Drift; RFK = Random Forest Kriging; OK = Ordinary Kriging; IDW = Inverse distance Weighting}
 
 \item{show_rmse}{default = TRUE, should the RMSE values derived by loocv_interpolate_points be displayed?}
-
-\item{co_variables}{default = FALSE, vector of covariables if needed}
 }
 \value{
 interpolated point values as sp or raster file depending on outputfile

@@ -4,13 +4,23 @@
 \alias{videoplot_rasterstack}
 \title{Videoplot predicted raster stack}
 \usage{
-videoplot_rasterstack(rstack, ffmpeg_path, storefile,
+videoplot_rasterstack(
+  rstack,
+  ffmpeg_path,
+  storefile,
   other.opts = "-pix_fmt yuv420p -b 500k -s:v 720x720",
-  main = "default", col = colorRampPalette(c("green", "yellow",
-  "red"))(8), breaks = c(0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875,
-  1), sub = "", cex.axis = 1.3, cex.main = 1.8, cex.sub = 1.6,
-  cex.lab = 1.4, legend.width = 2, legend.shrink = 0.8,
-  axis.args = list(cex.axis = 1.3))
+  main = "default",
+  col = colorRampPalette(c("green", "yellow", "red"))(8),
+  breaks = c(0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1),
+  sub = "",
+  cex.axis = 1.3,
+  cex.main = 1.8,
+  cex.sub = 1.6,
+  cex.lab = 1.4,
+  legend.width = 2,
+  legend.shrink = 0.8,
+  axis.args = list(cex.axis = 1.3)
+)
 }
 \arguments{
 \item{rstack}{list containing an raster stack of predictions as created by ´machine_predictor´. The names of the rasters are expected to be in the format "X20180515" for the date 2018-05-15}

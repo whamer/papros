@@ -4,8 +4,13 @@
 \alias{interpolate_points}
 \title{Interpolates point values}
 \usage{
-interpolate_points(sp_points, aim_variable, outputfile,
-  co_variables = FALSE, procedure = c("ked", "rfk", "ok", "idw"))
+interpolate_points(
+  sp_points,
+  aim_variable,
+  outputfile,
+  co_variables = FALSE,
+  procedure = c("ked", "rfk", "ok", "idw")
+)
 }
 \arguments{
 \item{sp_points}{SpatialPointsDataframe containing the aim variable and if "ked" should be applied the covariables}

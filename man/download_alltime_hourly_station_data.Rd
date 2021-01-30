@@ -4,9 +4,11 @@
 \alias{download_alltime_hourly_station_data}
 \title{Download alltime hourly weather data of the DWD stations}
 \usage{
-download_alltime_hourly_station_data(station,
+download_alltime_hourly_station_data(
+  station,
   parameter = c("temperature", "precipitation", "windspeed"),
-  astbl = FALSE)
+  astbl = FALSE
+)
 }
 \arguments{
 \item{station}{the station ID}

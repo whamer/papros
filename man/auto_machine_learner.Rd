@@ -4,8 +4,12 @@
 \alias{auto_machine_learner}
 \title{Apply machine learning functions}
 \usage{
-auto_machine_learner(dataframe, aim_variable, co_variables,
-  method = c("DT", "BDT", "RF"))
+auto_machine_learner(
+  dataframe,
+  aim_variable,
+  co_variables,
+  method = c("DT", "BDT", "RF")
+)
 }
 \arguments{
 \item{dataframe}{dataframe containing variables of interest}
